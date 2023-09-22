@@ -29,45 +29,41 @@ class MyHomePage extends StatefulWidget {
 
 class _MyHomePageState extends State<MyHomePage> {
   List<List<int?>> sudokuBoard = List.generate(9, (i) => List<int?>.filled(9, null));
-  bool isCorrect() {
-    for (int row = 0; row < 9; row++) {
-      for (int col = 0; col < 9; col++) {
-        int? currentNumber = sudokuBoard[row][col];
+  bool isCorrect(int row, int col) {
+    int? currentNumber = sudokuBoard[row][col];
 
-        // Check if the current cell is empty or contains an invalid number
-        if (currentNumber == null || currentNumber < 1 || currentNumber > 9) {
-          return false; // If any cell is empty or contains an invalid number, the Sudoku is incorrect
-        }
+    if (currentNumber == null) {
+      return true; // An empty cell is always considered correct
+    }
 
-        // Check the current row for duplicates
-        for (int checkCol = col + 1; checkCol < 9; checkCol++) {
-          if (sudokuBoard[row][checkCol] == currentNumber) {
-            return false; // Duplicate number found in the same row
-          }
-        }
+    // Check the same row for duplicates
+    for (int i = 0; i < 9; i++) {
+      if (i != col && sudokuBoard[row][i] == currentNumber) {
+        return false; // Duplicate in the same row
+      }
+    }
 
-        // Check the current column for duplicates
-        for (int checkRow = row + 1; checkRow < 9; checkRow++) {
-          if (sudokuBoard[checkRow][col] == currentNumber) {
-            return false; // Duplicate number found in the same column
-          }
-        }
+    // Check the same column for duplicates
+    for (int i = 0; i < 9; i++) {
+      if (i != row && sudokuBoard[i][col] == currentNumber) {
+        return false; // Duplicate in the same column
+      }
+    }
 
-        // Check the current 3x3 subgrid for duplicates
-        int subgridStartRow = (row ~/ 3) * 3;
-        int subgridStartCol = (col ~/ 3) * 3;
-        for (int checkRow = subgridStartRow; checkRow < subgridStartRow + 3; checkRow++) {
-          for (int checkCol = subgridStartCol; checkCol < subgridStartCol + 3; checkCol++) {
-            if (checkRow != row && checkCol != col && sudokuBoard[checkRow][checkCol] == currentNumber) {
-              return false; // Duplicate number found in the same 3x3 subgrid
-            }
-          }
+    // Check the same 3x3 subgrid for duplicates
+    int subgridRow = (row ~/ 3) * 3;
+    int subgridCol = (col ~/ 3) * 3;
+    for (int i = subgridRow; i < subgridRow + 3; i++) {
+      for (int j = subgridCol; j < subgridCol + 3; j++) {
+        if (i != row && j != col && sudokuBoard[i][j] == currentNumber) {
+          return false; // Duplicate in the same 3x3 subgrid
         }
       }
     }
 
-    return true; // If all checks pass, the Sudoku board is correct
+    return true; // No duplicates found
   }
+
 
   bool solveSudoku() {
 
@@ -93,17 +89,21 @@ class _MyHomePageState extends State<MyHomePage> {
                   shrinkWrap: true,
                   gridDelegate: const SliverGridDelegateWithFixedCrossAxisCount(
                     crossAxisCount: 9,
-                    mainAxisSpacing: 5.0,
-                    crossAxisSpacing: 5.0,
                     childAspectRatio: 1.0,
                   ),
                   itemBuilder: (context, index) {
                     int row = index ~/ 9;
                     int col = index % 9;
+
+                    bool isValid = isCorrect(row, col);
                     return Container(
                       decoration: BoxDecoration(
                         border: Border.all(color: Colors.black),
-                        color: sudokuBoard[row][col] == null ? Colors.white : Colors.grey[300],
+                        color: sudokuBoard[row][col] == null
+                            ? isValid
+                            ? Colors.white
+                            : Colors.red
+                            : Colors.grey[300],
                       ),
                       child: TextField(
                         textAlign: TextAlign.center,
@@ -140,7 +140,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 const SizedBox(height: 20.0),
                 ElevatedButton(
                   onPressed: () {
-                        if(isCorrect()){
+                        if(isCorrect(5,5)){
                             solveSudoku();
                         }else{
                           Fluttertoast.showToast(
