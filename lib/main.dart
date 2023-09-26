@@ -39,14 +39,14 @@ class _MyHomePageState extends State<MyHomePage> {
     // Check the same row for duplicates
     for (int i = 0; i < 9; i++) {
       if (i != col && sudokuBoard[row][i] == currentNumber) {
-        return false; // Duplicate in the same row
+        return false;
       }
     }
 
     // Check the same column for duplicates
     for (int i = 0; i < 9; i++) {
       if (i != row && sudokuBoard[i][col] == currentNumber) {
-        return false; // Duplicate in the same column
+        return false;
       }
     }
 
@@ -96,18 +96,19 @@ class _MyHomePageState extends State<MyHomePage> {
                     int col = index % 9;
 
                     bool isValid = isCorrect(row, col);
+
+                    Color? cellColor=sudokuBoard[row][col] == null ? Colors.white : Colors.grey[300];
                     return Container(
                       decoration: BoxDecoration(
                         border: Border.all(color: Colors.black),
-                        color: sudokuBoard[row][col] == null
-                            ? isValid
-                            ? Colors.white
-                            : Colors.red
-                            : Colors.grey[300],
+                        color: cellColor,
                       ),
                       child: TextField(
                         textAlign: TextAlign.center,
                         keyboardType: TextInputType.number,
+                        style: TextStyle(
+                          color: isValid || sudokuBoard[row][col] == null ? Colors.black : Colors.red,
+                        ),
                         onChanged: (value) {
                           if (value.isEmpty) {
                             setState(() {
@@ -130,6 +131,18 @@ class _MyHomePageState extends State<MyHomePage> {
                                 sudokuBoard[row][col] = null;
                               });
                             }
+                          }
+                          bool isValid = isCorrect(row, col);
+                          if (!isValid) {
+
+                            Fluttertoast.showToast(
+                              msg: "Error",
+                              toastLength: Toast.LENGTH_SHORT,
+                              gravity: ToastGravity.CENTER,
+                              backgroundColor: Colors.red,
+                              textColor: Colors.white,
+                              fontSize: 16.0,
+                            );
                           }
                         },
                       ),
