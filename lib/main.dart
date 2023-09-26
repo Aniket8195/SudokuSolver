@@ -35,6 +35,9 @@ class _MyHomePageState extends State<MyHomePage> {
     if (currentNumber == null) {
       return true; // An empty cell is always considered correct
     }
+    if (currentNumber > 9|| currentNumber<1) {
+      return false;
+    }
 
     // Check the same row for duplicates
     for (int i = 0; i < 9; i++) {
@@ -107,7 +110,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         textAlign: TextAlign.center,
                         keyboardType: TextInputType.number,
                         style: TextStyle(
-                          color: isValid || sudokuBoard[row][col] == null ? Colors.black : Colors.red,
+                          color: isValid ? Colors.black : Colors.red,
                         ),
                         onChanged: (value) {
                           if (value.isEmpty) {
@@ -121,12 +124,10 @@ class _MyHomePageState extends State<MyHomePage> {
                                 setState(() {
                                   sudokuBoard[row][col] = number;
                                 });
-                              } else {
-                                setState(() {
-                                  sudokuBoard[row][col] = null;
-                                });
                               }
-                            } catch (e) {
+                            }
+
+                            catch (e) {
                               setState(() {
                                 sudokuBoard[row][col] = null;
                               });
@@ -136,7 +137,7 @@ class _MyHomePageState extends State<MyHomePage> {
                           if (!isValid) {
 
                             Fluttertoast.showToast(
-                              msg: "Error",
+                              msg: "Error: Enter a number between 1 and 9.",
                               toastLength: Toast.LENGTH_SHORT,
                               gravity: ToastGravity.CENTER,
                               backgroundColor: Colors.red,
