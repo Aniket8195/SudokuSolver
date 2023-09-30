@@ -68,10 +68,80 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
 
-  bool solveSudoku() {
+  solveSudoku() {
+    if (_solveSudoku(0, 0)) {
+      // Sudoku is solved, update the UI with the solved puzzle.
+      setState(() {});
+    } else {
+      // If no solution exists, display an error message.
+      Fluttertoast.showToast(
+        msg: "No solution exists for this Sudoku.",
+        toastLength: Toast.LENGTH_SHORT,
+        gravity: ToastGravity.CENTER,
+        backgroundColor: Colors.red,
+        textColor: Colors.white,
+        fontSize: 16.0,
+      );
+    }
+  }
+
+  bool _solveSudoku(int row, int col) {
+    // Base case: If we have filled all the cells, the Sudoku is solved.
+    if (row == 9) {
+      return true;
+    }
+
+    // Move to the next cell.
+    int nextRow = (col == 8) ? row + 1 : row;
+    int nextCol = (col + 1) % 9;
+
+    // Skip cells that are already filled.
+    if (sudokuBoard[row][col] != null) {
+      return _solveSudoku(nextRow, nextCol);
+    }
+
+    // Try filling the current cell with numbers from 1 to 9.
+    for (int num = 1; num <= 9; num++) {
+      if (_isSafe(row, col, num)) {
+        // If it's safe to place the number, update the board.
+        sudokuBoard[row][col] = num;
+
+        // Recursively try to solve the remaining Sudoku.
+        if (_solveSudoku(nextRow, nextCol)) {
+          return true;
+        }
+
+        // If the current placement doesn't lead to a solution, backtrack.
+        sudokuBoard[row][col] = null;
+      }
+    }
+
+    // If no number can be placed here, return false to backtrack further.
+    return false;
+  }
+
+  bool _isSafe(int row, int col, int num) {
+    // Check if 'num' is not present in the current row, current column, and current 3x3 subgrid.
+    for (int i = 0; i < 9; i++) {
+      if (sudokuBoard[row][i] == num || sudokuBoard[i][col] == num) {
+        return false;
+      }
+    }
+
+    int subgridRow = (row ~/ 3) * 3;
+    int subgridCol = (col ~/ 3) * 3;
+    for (int i = subgridRow; i < subgridRow + 3; i++) {
+      for (int j = subgridCol; j < subgridCol + 3; j++) {
+        if (sudokuBoard[i][j] == num) {
+          return false;
+        }
+      }
+    }
 
     return true;
   }
+
+
   @override
   Widget build(BuildContext context) {
 
@@ -99,7 +169,8 @@ class _MyHomePageState extends State<MyHomePage> {
                     int col = index % 9;
 
                     bool isValid = isCorrect(row, col);
-
+                    int? cellValue = sudokuBoard[row][col];
+                    String displayText = cellValue != null ? '$cellValue' : '';
                     Color? cellColor=sudokuBoard[row][col] == null ? Colors.white : Colors.grey[300];
                     return Container(
                       decoration: BoxDecoration(
@@ -112,6 +183,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         style: TextStyle(
                           color: isValid ? Colors.black : Colors.red,
                         ),
+                        controller: TextEditingController(text: displayText),
                         onChanged: (value) {
                           if (value.isEmpty) {
                             setState(() {
@@ -154,18 +226,7 @@ class _MyHomePageState extends State<MyHomePage> {
                 const SizedBox(height: 20.0),
                 ElevatedButton(
                   onPressed: () {
-                        if(isCorrect(5,5)){
-                            solveSudoku();
-                        }else{
-                          Fluttertoast.showToast(
-                              msg: "Error",
-                              toastLength: Toast.LENGTH_SHORT,
-                              gravity: ToastGravity.CENTER,
-                              backgroundColor: Colors.red,
-                              textColor: Colors.white,
-                              fontSize: 16.0
-                          );
-                        }
+                        solveSudoku();
                   },
                   child: const Text('Solve Sudoku'),
                 ),
