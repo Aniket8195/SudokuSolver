@@ -230,6 +230,21 @@ class _MyHomePageState extends State<MyHomePage> {
                   },
                   child: const Text('Solve Sudoku'),
                 ),
+                const SizedBox(height: 20.0),
+                ElevatedButton(
+                    onPressed: (){
+                      setState(() {
+                        for (int i = 0; i < 9; i++) {
+                          for(int j=0;j<9;j++){
+                            sudokuBoard[i][j]=null;
+                          }
+                        }
+                      });
+                    },
+
+                    child:const Text("Reset")
+
+                )
               ],
             ),
           ),
